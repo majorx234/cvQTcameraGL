@@ -1,3 +1,10 @@
+#define IN_SHADERTOY 1
+
+#ifndef IN_SHADERTOY
+	uniform vec2 iResolution;
+	uniform vec3 iGlobalTime;
+#endif
+
 #define pass_1_tex iChannel0
 #define pass_2_tex iChannel1
 #define pass_3_tex iChannel2

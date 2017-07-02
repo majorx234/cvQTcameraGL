@@ -1,3 +1,10 @@
+#define IN_SHADERTOY 1
+
+#ifndef IN_SHADERTOY
+	uniform vec2 iResolution;
+	uniform vec3 iGlobalTime;
+#endif
+
 
 
 #define webcam_tex iChannel0
