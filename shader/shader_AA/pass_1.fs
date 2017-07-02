@@ -1,25 +1,37 @@
-#define IN_SHADERTOY 1
+//#define IN_SHADERTOY 1
 
 #ifndef IN_SHADERTOY
-	uniform vec2 iResolution;
-	uniform vec3 iGlobalTime;
+    uniform sampler2D webcam_tex;
+    uniform sampler2D noise_tex;
+
+    uniform sampler2D pass_1_tex;
+    uniform sampler2D pass_2_tex;
+    uniform sampler2D pass_3_tex;
+    uniform sampler2D pass_final_tex;
+
+    uniform vec2 iResolution;
+    uniform float iGlobalTime;
+
+    #define texture texture2D
+
+#else
+
+    #define webcam_tex iChannel0
+
+    #define pass_1_tex iChannel1
+    #define pass_2_tex iChannel2
+    #define pass_3_tex iChannel3
+    //#define pass_final_tex iChannel3
+
+
 #endif
 
 
-
-#define webcam_tex iChannel0
-
-#define pass_1_tex iChannel1
-#define pass_2_tex iChannel2
-#define pass_3_tex iChannel3
-//#define pass_final_tex iChannel3
-
-
 void mainImage (out vec4 fragColor, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
+    vec2 uv = fragCoord.xy / iResolution.xy;
     
     vec3 base_color = vec3(0);
-	
+    
     float v_stripes = 16.0;
     float h_stripes = 16.0;
     vec2 sub_uv = mod(uv, vec2(1.0, 1.0 / v_stripes)) * vec2(h_stripes, v_stripes);
@@ -50,4 +62,9 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
         
     
     fragColor = vec4(base_color, 1.0);
+}
+
+
+void main() {
+    mainImage(gl_FragColor, gl_FragCoord.xy);
 }
