@@ -1,25 +1,29 @@
-varying vec3 lightDir,normal;
+//Sampler2d
 
-void main()
-{
+uniform sampler2D pass_1_tex;
+uniform sampler2D pass_2_tex;
+uniform sampler2D pass_3_tex;
+uniform sampler2D pass_final_tex;
 
-	float intensity;
-	vec4 color;
+uniform sampler2D webcam_tex;
+
+
+uniform float iGlobalTime;
+uniform vec2 iResolution;
+
+
+void main() {
+	vec4 color = vec4(
+		mod(iGlobalTime, 1.0),
+		step(iResolution.x, gl_FragCoord.x),
+		step(iResolution.y, gl_FragCoord.y),
+		1.0
+	);
+
+	vec2 uv = gl_FragCoord.xy / iResolution;
+
+	color = texture2D (pass_1_tex, uv);
 	
-	// normalizing the lights position to be on the safe side
-	
-	vec3 n = normalize(normal);
-	
-	intensity = dot(lightDir,n);
-	
-	if (intensity > 0.95)
-		color = vec4(1.0,0.5,0.5,1.0);
-	else if (intensity > 0.5)
-		color = vec4(0.6,0.3,0.3,1.0);
-	else if (intensity > 0.25)
-		color = vec4(0.4,0.2,0.2,1.0);
-	else
-		color = vec4(0.2,0.1,0.1,1.0);
 	
 	gl_FragColor = color;
 } 

@@ -48,6 +48,11 @@ set(WIDGET_SOURCES
 
 )
 
+set(SHADER_SOURCES
+ ${CMAKE_CURRENT_SOURCE_DIR}/shader/toonf2.frag
+ ${CMAKE_CURRENT_SOURCE_DIR}/shader/toonf2.vert
+)
+
 ADD_LIBRARY(textfile
   ${TEXTFILE_SOURCES}
 
@@ -56,6 +61,7 @@ ADD_LIBRARY(textfile
 ADD_LIBRARY(widget
   ${WIDGET_SOURCES}
   ${WIDGET_MOC_SOURCES}
+  ${SHADER_SOURCES}
 )
 
 ADD_EXECUTABLE(cvQTcameraGL
@@ -77,3 +83,8 @@ TARGET_LINK_LIBRARIES(cvQTcameraGL
 
 qt5_use_modules(widget Core Gui Widgets OpenGL)
 qt5_use_modules(cvQTcameraGL Core Gui Widgets)
+
+add_custom_command(TARGET widget POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shader
+        $<TARGET_FILE_DIR:widget>/shader)
