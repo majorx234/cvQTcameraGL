@@ -106,9 +106,6 @@ void GLWidget::paintGL()
     }
     cv::cvtColor(cv_frame, cv_frame, CV_BGR2RGBA);
 
-
-
-
     glEnable(GL_TEXTURE_2D);
 
     glActiveTexture(GL_TEXTURE0);
@@ -121,9 +118,12 @@ void GLWidget::paintGL()
     glTexImage2D(GL_TEXTURE_2D, 0,
                  GL_RGBA8, cv_frame.cols, cv_frame.rows, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, cv_frame.data);
+    
+    GLenum error_code = glGetError();
+
     if (glGetError() != GL_NO_ERROR)
     {
-        std::cout << "GLWidget::paintGL: !!! Failed glTexImage2D" << std::endl;
+        std::cout << "GLWidget::paintGL: !!! Failed glTexImage2D with errorcode: " << error_code << " shouldn't be : " << GL_NO_ERROR << std::endl;
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -201,18 +201,30 @@ void GLWidget::setShaders() {
         printf("OpenGL 2.0 not supported\n");
         exit(1);
     }
-    char *vs = NULL,*fs = NULL,*fs2 = NULL;
+    char *vs1 = NULL,*vs2 = NULL,*vs3 = NULL,*vs4 = NULL,*fs = NULL,*fs2 = NULL;
 
-    v = glCreateShader(GL_VERTEX_SHADER);
+    v1 = glCreateShader(GL_VERTEX_SHADER);
+    v2 = glCreateShader(GL_VERTEX_SHADER);
+    v3 = glCreateShader(GL_VERTEX_SHADER);
+    v4 = glCreateShader(GL_VERTEX_SHADER);
     f = glCreateShader(GL_FRAGMENT_SHADER);
     f2 = glCreateShader(GL_FRAGMENT_SHADER);
 
-    char* vs_path = "shader/toonf2.vert";
+    char* vs_path1 = "shader/shader_AA/pass_1.fs";
+    char* vs_path2 = "shader/shader_AA/pass_2.fs";
+    char* vs_path3 = "shader/shader_AA/pass_3.fs";
+    char* vs_path4 = "shader/shader_AA/pass_final.fs";
     char* fs_path = "shader/toonf2.frag";
-    vs = textFileRead(vs_path);
+    vs1 = textFileRead(vs_path1);
+    vs2 = textFileRead(vs_path2);
+    vs3 = textFileRead(vs_path3);
+    vs4 = textFileRead(vs_path4);
     fs = textFileRead(fs_path);
 
-    char * vv = vs;
+    char * vv1 = vs1;
+    char * vv2 = vs2;
+    char * vv3 = vs3;
+    char * vv4 = vs4;
     char * ff = fs;
     
     //std::string 
@@ -220,20 +232,36 @@ void GLWidget::setShaders() {
     
     //qDebug("%d", strlen(vv));
     //printf("source: %s\n\n", vv);
-    glShaderSource(v, 1, &vv,NULL);
+    glShaderSource(v1, 1, &vv1,NULL);
+    glShaderSource(v2, 1, &vv2,NULL);
+    glShaderSource(v3, 1, &vv3,NULL);
+    glShaderSource(v4, 1, &vv4,NULL);
     glShaderSource(f, 1, &ff,NULL);
 
-    free(vs);free(fs);
+    free(vs1);
+    free(vs2);
+    free(vs3);
+    free(vs4);
+    free(fs);
 
-    glCompileShader(v);
+    glCompileShader(v1);
+    glCompileShader(v2);
+    glCompileShader(v3);
+    glCompileShader(v4);
     glCompileShader(f);
 
-    printShaderInfoLog(v);
+    printShaderInfoLog(v1);
+    printShaderInfoLog(v2);
+    printShaderInfoLog(v3);
+    printShaderInfoLog(v4);
     printShaderInfoLog(f);
     printShaderInfoLog(f2);
 
     p = glCreateProgram();
-    glAttachShader(p,v);
+    glAttachShader(p,v1);
+    glAttachShader(p,v2);
+    glAttachShader(p,v3);
+    glAttachShader(p,v4);
     glAttachShader(p,f);
 
     glLinkProgram(p);

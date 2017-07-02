@@ -40,7 +40,7 @@ private:
     int _fps;
     GLuint  _texture;
     GLint loc;
-    GLuint v,f,f2,p;
+    GLuint v1,v2,v3,v4,f,f2,p;
 
 protected slots:
     void _tick();
