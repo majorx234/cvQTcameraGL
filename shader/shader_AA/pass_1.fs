@@ -13,6 +13,7 @@
     uniform float iGlobalTime;
 
     #define texture texture2D
+    
 
 #else
 
@@ -43,7 +44,7 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
     if (abs(mod(sub_uv.x, 2.0) - 1.0) < mod(sub_uv.y, 1.0)) {
     
         if (abs(mod(iGlobalTime * 1.5 * 0.5 + 0.5, 2.0) - 1.0) < mod(uv.y, 1.0)) {
-            base_color = texture(webcam_tex, uv).rgb;
+            base_color = texture(webcam_tex, vec2(1.0) - uv).rgb;
 
         } else {
             base_color = texture(pass_1_tex, uv).rgb;
@@ -52,7 +53,7 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
     } else {
         
         if (abs(mod(iGlobalTime * 2.0 * 0.5, 2.0) - 1.0) < 1.0 - mod(uv.y, 1.0)) {
-            base_color = texture(webcam_tex, uv).rgb;
+            base_color = texture(webcam_tex, vec2(1.0) - uv).rgb;
 
         } else {
             base_color = texture(pass_1_tex, uv).rgb;
@@ -64,7 +65,9 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
     fragColor = vec4(base_color, 1.0);
 }
 
+#ifndef IN_SHADERTOY
 
 void main() {
     mainImage(gl_FragColor, gl_FragCoord.xy);
 }
+#endif

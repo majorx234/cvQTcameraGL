@@ -1,7 +1,6 @@
 //#define IN_SHADERTOY 1
 
 #ifndef IN_SHADERTOY
-	
     uniform sampler2D webcam_tex;
     uniform sampler2D noise_tex;
 
@@ -9,22 +8,18 @@
   uniform sampler2D pass_2_tex;
   uniform sampler2D pass_3_tex;
   uniform sampler2D pass_final_tex;
-  
-    uniform vec2 iResolution;
-    uniform float iGlobalTime;
+
+  uniform vec2 iResolution;
+  uniform float iGlobalTime;
 
     #define texture texture2D
     
 #else
 
-    #define pass_1_tex iChannel0
-    #define pass_2_tex iChannel1
-    #define pass_3_tex iChannel2
-    #define pass_final_tex iChannel3
+	#define pass_2_tex iChannel0
+	#define webcam_tex iChannel1
 
 #endif
-
-
 
 
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {
@@ -61,25 +56,27 @@ vec3 palettize(vec2 p) {
     return col;
 }
 
-
 void mainImage (out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     
     vec3 base_color = texture(pass_2_tex, uv).rgb;
+    vec3 base_color2 = texture(webcam_tex, uv).rgb;
     vec3 hsv_color = rgb2hsv(base_color);
+    vec3 hsv_color2 = rgb2hsv(base_color2);
     
-    vec3 tmp_color = palettize(vec2(abs(mod(hsv_color.x + iGlobalTime * 0.2, 2.0) - 1.0), mod(iGlobalTime/100.0, 1.0)));
+    vec3 tmp_color = palettize(vec2(cos((base_color.x * 2.0 - iGlobalTime) * 3.1415) * 0.5 + 0.5 , mod(iGlobalTime/100.0, 1.0)));
     vec3 hsv_tmp_color = rgb2hsv(tmp_color);
     base_color = hsv2rgb(vec3(
         hsv_tmp_color.r,
-        hsv_tmp_color.g * 0.75 + 0.5 * hsv_color.g, 
-        hsv_tmp_color.b * 0.25 + 0.5 * hsv_color.b
+        hsv_color.g, 
+        hsv_color2.b* 0.1 + hsv_color.b
     ));
     
     
     
     fragColor = vec4(base_color, 1.0);
 }
+
 
 
 

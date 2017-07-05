@@ -1,11 +1,11 @@
 //Sampler2d
 
 uniform sampler2D pass_1_tex;
-uniform sampler2D pass_2_tex;
-uniform sampler2D pass_3_tex;
-uniform sampler2D pass_final_tex;
+//uniform sampler2D pass_2_tex;
+//uniform sampler2D pass_3_tex;
+//uniform sampler2D pass_final_tex;
 
-uniform sampler2D webcam_tex;
+//uniform sampler2D webcam_tex;
 
 
 uniform float iGlobalTime;
@@ -22,8 +22,10 @@ void main() {
 
 	vec2 uv = gl_FragCoord.xy / iResolution;
 
-	color = texture2D (pass_1_tex, uv);
+	//color = texture2D (pass_1_tex, uv);
 	
+    gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 	
 	gl_FragColor = color;
+    gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 } 

@@ -1,8 +1,8 @@
 //#define IN_SHADERTOY 1
 
 #ifndef IN_SHADERTOY
-    uniform sampler2D webcam_tex;
-    uniform sampler2D noise_tex;
+  uniform sampler2D webcam_tex;
+  uniform sampler2D noise_tex;
 
   uniform sampler2D pass_1_tex;
   uniform sampler2D pass_2_tex;
@@ -13,8 +13,8 @@
   uniform float iGlobalTime;
 
     #define texture texture2D
+    
 #else
-
   #define pass_1_tex iChannel0
   #define pass_2_tex iChannel1
   #define pass_3_tex iChannel2
@@ -34,6 +34,8 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
 }
 
 
+#ifndef IN_SHADERTOY
 void main() {
     mainImage(gl_FragColor, gl_FragCoord.xy);
 }
+#endif

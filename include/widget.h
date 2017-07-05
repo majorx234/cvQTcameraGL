@@ -19,6 +19,9 @@
 #include <QGLWidget>
 #include <QImage>
 
+
+#define PASS_COUNT 4
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -38,9 +41,20 @@ private:
     cv::Mat cv_frame;
     cv::VideoCapture cv_capture;
     int _fps;
-    GLuint  _texture;
-    GLint loc;
-    GLuint v1,v2,v3,v4,f,f2,p;
+
+    int time;
+
+    GLuint depth_tex;
+
+    GLuint pass_p[PASS_COUNT];
+    GLuint common_vs;
+    GLuint pass_fs[PASS_COUNT];
+
+    GLuint pass_tex[PASS_COUNT];
+    GLuint pass_fbo[PASS_COUNT];
+
+    GLuint noise_tex, webcam_tex;
+
 
 protected slots:
     void _tick();
