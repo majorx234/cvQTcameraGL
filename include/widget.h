@@ -34,7 +34,7 @@ public:
     void initializeGL();
     void paintGL();
     void resizeGL( int width, int height);
-    void setShaders();
+    void setShaders(std::string shader_path);
 private:
     int _width;
     int _height;

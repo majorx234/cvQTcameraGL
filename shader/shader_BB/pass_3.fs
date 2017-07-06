@@ -60,19 +60,6 @@ void mainImage (out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     
     vec3 base_color = texture(pass_2_tex, uv).rgb;
-    vec3 base_color2 = texture(webcam_tex, vec2(1.0) - uv).rgb;
-    vec3 hsv_color = rgb2hsv(base_color);
-    vec3 hsv_color2 = rgb2hsv(base_color2);
-    
-    vec3 tmp_color = palettize(vec2(cos((base_color.x * 2.0 - iGlobalTime) * 3.1415) * 0.5 + 0.5 , mod(iGlobalTime/100.0, 1.0)));
-    vec3 hsv_tmp_color = rgb2hsv(tmp_color);
-    base_color = hsv2rgb(vec3(
-        hsv_tmp_color.r,
-        hsv_color.g, 
-        hsv_color2.b* 0.1 + hsv_color.b
-    ));
-    
-    
     
     fragColor = vec4(base_color, 1.0);
 }

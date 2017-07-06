@@ -58,6 +58,17 @@ void GLWidget::_tick()
 
 void GLWidget::initializeGL()
 {
+    int camera_num;
+    std::string shader_path;
+
+    if (!(std::cin >> camera_num)) // do the conversion
+        camera_num = 0; // if conversion fails, set myint to a default value
+    std::cout << "Using camera_num: " << camera_num << '\n';
+
+    if (!(std::cin >> shader_path)) // do the conversion
+        shader_path = "error"; // if conversion fails, set myint to a default value
+    std::cout << "Using shader_path: " << shader_path << '\n';
+
     glewInit();
     // Set clear color as violet to be able to spot a broken shader
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
@@ -69,7 +80,23 @@ void GLWidget::initializeGL()
 
     // Create the texture
     glGenTextures(1, &webcam_tex);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, webcam_tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 32, 32, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+
     glGenTextures(1, &noise_tex);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, noise_tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 32, 32, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
     std::cout << "Starting the creation of fb" << std::endl;
 
@@ -81,21 +108,22 @@ void GLWidget::initializeGL()
     std::cout << "Opening the camera" << std::endl;
 
     /* Open default camera device */
-
-    cv_capture.open(0);
+    cv_capture.open(camera_num);
     if (!cv_capture.isOpened())
     {
         std::cout << "GLWidget::initializeGL: !!! Failed to open camera" << std::endl;
-        return;
+        _fps = 30;
+        //return;
+    } else {
+
+        // Retrieve FPS from the camera
+        _fps = cv_capture.get(CV_CAP_PROP_FPS);
+        if (!_fps) // if the function fails, fps is set to 15
+            _fps = 15;
     }
 
-    // Retrieve FPS from the camera
-    _fps = cv_capture.get(CV_CAP_PROP_FPS);
-    if (!_fps) // if the function fails, fps is set to 15
-        _fps = 15;
-
     std::cout << "Preparing the shaders" << std::endl;
-    setShaders();
+    setShaders(shader_path);
 
     std::cout << "GLWidget::initializeGL: " << _fps << " fps" << std::endl;
 
@@ -106,27 +134,42 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-
+    bool image_captured = false;
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     // Abort drawing if OpenCV was unable to open the camera
     if (!cv_capture.isOpened())
     {
         std::cout << "GLWidget::paintGL: !!! Failed to open camera" << std::endl;
-        return;
-    }
-
-    // Note: trying to retrieve more frames than the camera can give you
-    // will make the output video blink a lot.
-    cv_capture >> cv_frame;
-    if (cv_frame.empty())
-    {
-        std::cout << "GLWidget::paintGL: !!! Failed to retrieve frame" << std::endl;
         //return;
     } else {
-        cv::cvtColor(cv_frame, cv_frame, CV_BGR2RGBA);
+
+        // Note: trying to retrieve more frames than the camera can give you
+        // will make the output video blink a lot.
+        cv_capture >> cv_frame;
+        if (cv_frame.empty())
+        {
+            std::cout << "GLWidget::paintGL: !!! Failed to retrieve frame" << std::endl;
+            //return;
+        } else {
+            cv::cvtColor(cv_frame, cv_frame, CV_BGR2RGBA);
+
+            glActiveTextureARB(GL_TEXTURE4);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, webcam_tex);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+            // Transfer image data to the GPU
+            if (!cv_frame.empty()) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cv_frame.cols, cv_frame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, cv_frame.data);
+                image_captured = true;
+            }
+        }
     }
-        glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 
 
     for (int i=0; i<4; i++) {
@@ -157,10 +200,7 @@ void GLWidget::paintGL()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-        // Transfer image data to the GPU
-        if (!cv_frame.empty()) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cv_frame.cols, cv_frame.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, cv_frame.data);
-        }
+
 
         GLenum error_code = glGetError();
 
@@ -217,7 +257,6 @@ void GLWidget::paintGL()
         GLint resolution_loc = glGetUniformLocation(p, "iResolution");
         glUniform1f(time_loc, time / 1000.0);
         time += 1000 / _fps / 2;
-        std::cout << _fps << std::endl;
         glUniform2f(resolution_loc, _width, _height);
 
 
@@ -322,7 +361,7 @@ void GLWidget::resizeGL( int w, int h)
     }
 }
 
-void GLWidget::setShaders() {
+void GLWidget::setShaders(std::string shader_path) {
     glewInit();
     if (glewIsSupported("GL_VERSION_2_0"))
         printf("Ready for OpenGL 2.0\n");
@@ -338,15 +377,15 @@ void GLWidget::setShaders() {
     pass_fs[3] = glCreateShader(GL_FRAGMENT_SHADER);
     common_vs = glCreateShader(GL_VERTEX_SHADER);
 
-    char* fs_path1 = "shader/shader_AA/pass_1.fs";
-    char* fs_path2 = "shader/shader_AA/pass_2.fs";
-    char* fs_path3 = "shader/shader_AA/pass_3.fs";
-    char* fs_path4 = "shader/shader_AA/pass_final.fs";
+    std::string fs_path1 = "shader/" + shader_path + "/pass_1.fs";
+    std::string fs_path2 = "shader/" + shader_path + "/pass_2.fs";
+    std::string fs_path3 = "shader/" + shader_path + "/pass_3.fs";
+    std::string fs_path4 = "shader/" + shader_path + "/pass_final.fs";
     char* vs_path = "shader/toonf2.vert";
-    fs1 = textFileRead(fs_path1);
-    fs2 = textFileRead(fs_path2);
-    fs3 = textFileRead(fs_path3);
-    fs4 = textFileRead(fs_path4);
+    fs1 = textFileRead(fs_path1.c_str());
+    fs2 = textFileRead(fs_path2.c_str());
+    fs3 = textFileRead(fs_path3.c_str());
+    fs4 = textFileRead(fs_path4.c_str());
     vs = textFileRead(vs_path);
 
     

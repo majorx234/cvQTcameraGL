@@ -15,7 +15,7 @@
 #include <string.h>
 
 
-char *textFileRead(char *fn) {
+char *textFileRead(const char *fn) {
 
 
   FILE *fp;
