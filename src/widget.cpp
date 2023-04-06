@@ -24,7 +24,7 @@ void printShaderInfoLog(GLuint obj);
 void printProgramInfoLog(GLuint obj);
 
 GLWidget::GLWidget(QWidget *parent)
-: QGLWidget(parent)
+: QOpenGLWidget(parent)
 {
     _width = 0;
     _height = 0;
@@ -100,11 +100,6 @@ void GLWidget::initializeGL()
 
     std::cout << "Starting the creation of fb" << std::endl;
 
-
-
-
-
-
     std::cout << "Opening the camera" << std::endl;
 
     /* Open default camera device */
@@ -117,7 +112,7 @@ void GLWidget::initializeGL()
     } else {
 
         // Retrieve FPS from the camera
-        _fps = cv_capture.get(CV_CAP_PROP_FPS);
+        _fps = cv_capture.get(cv::CAP_PROP_FPS);
         if (!_fps) // if the function fails, fps is set to 15
             _fps = 15;
     }
@@ -152,7 +147,7 @@ void GLWidget::paintGL()
             std::cout << "GLWidget::paintGL: !!! Failed to retrieve frame" << std::endl;
             //return;
         } else {
-            cv::cvtColor(cv_frame, cv_frame, CV_BGR2RGBA);
+            cv::cvtColor(cv_frame, cv_frame, cv::COLOR_BGR2RGBA);
 
             glActiveTextureARB(GL_TEXTURE4);
             glEnable(GL_TEXTURE_2D);

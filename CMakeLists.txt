@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.8)
 PROJECT(cvQTcameraGL)
 
 find_package( OpenCV REQUIRED )
 set(CMAKE_AUTOMOC ON)
-find_package( Qt5Widgets REQUIRED)
-find_package( Qt5Core REQUIRED)
-find_package( Qt5OpenGL REQUIRED)
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
 find_package( GLUT REQUIRED)
 find_package( GLEW   REQUIRED )
 find_package( OpenGL REQUIRED)
@@ -58,32 +57,32 @@ ADD_LIBRARY(textfile
 
 )
 
-ADD_LIBRARY(widget
+ADD_LIBRARY(widget)
+target_sources(widget
+  PRIVATE
   ${WIDGET_SOURCES}
   ${WIDGET_MOC_SOURCES}
   ${SHADER_SOURCES}
 )
-
-ADD_EXECUTABLE(cvQTcameraGL
-  ${MAIN_MOC_SOURCES}
-  ${MAIN_SOURCES}
-)
-
 TARGET_LINK_LIBRARIES(widget
   ${OpenCV_LIBS} 
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARY}
-  ${GLEW_LIBRARY}
+  GLEW::GLEW
   textfile
+  Qt5::Core
+  Qt5::Widgets
 )
 
+ADD_EXECUTABLE(cvQTcameraGL)
+target_sources(cvQTcameraGL
+  PRIVATE
+  ${MAIN_MOC_SOURCES}
+  ${MAIN_SOURCES}
+)
 TARGET_LINK_LIBRARIES(cvQTcameraGL
   widget
 )
-
-qt5_use_modules(widget Core Gui Widgets OpenGL)
-qt5_use_modules(cvQTcameraGL Core Gui Widgets)
-
 add_custom_command(TARGET widget POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/shader

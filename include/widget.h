@@ -16,13 +16,14 @@
     #include <glu.h>
 #endif
 #include <opencv2/opencv.hpp>
-#include <QGLWidget>
+#include <QOpenGLWidget>
+
 #include <QImage>
 
 
 #define PASS_COUNT 4
 
-class GLWidget : public QGLWidget
+class GLWidget : public QOpenGLWidget
 {
     Q_OBJECT
 public:
