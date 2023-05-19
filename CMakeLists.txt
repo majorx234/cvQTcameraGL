@@ -1,61 +1,57 @@
 cmake_minimum_required(VERSION 3.8)
 PROJECT(cvQTcameraGL)
 
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(GNUInstallDirs)
+
 find_package( OpenCV REQUIRED )
-set(CMAKE_AUTOMOC ON)
+
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
 find_package( GLUT REQUIRED)
 find_package( GLEW   REQUIRED )
 find_package( OpenGL REQUIRED)
 
-include_directories(${PROJECT_INCLUDE_DIR})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(include)
-include_directories(${GLUT_INCLUDE_DIR})
-link_directories(${GLUT_LIBRARY_DIRS})
-add_definitions(${GLUT_DEFINITIONS})
-include_directories(${OpenGL_INCLUDE_DIRS})
-link_directories(${OpenGL_LIBRARY_DIRS})
-add_definitions(${OpenGL_DEFINITIONS})
-
-QT5_WRAP_CPP( WIDGET_MOC_SOURCES
-              ${CMAKE_CURRENT_SOURCE_DIR}/src/widget.cpp
-              ${CMAKE_CURRENT_SOURCE_DIR}/include/widget.h)
-
-
-QT5_WRAP_CPP(MAIN_MOCsrcs
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+set(WIDGET_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/widget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/widget.h
 )
 
-set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include )
-
 set(MAIN_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 )
 
 set(TEXTFILE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/textfile.cpp
-
 )
 
-set(WIDGET_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/widget.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/widget.h
-
+QT5_WRAP_CPP( WIDGET_MOC_SOURCES
+  ${WIDGET_SOURCES}
+)
+	
+QT5_WRAP_CPP(MAIN_MOCsrcs
+  ${MAIN_SOURCES}
 )
 
-set(SHADER_SOURCES
+set(SHADER_SRC
  ${CMAKE_CURRENT_SOURCE_DIR}/shader/toonf2.frag
  ${CMAKE_CURRENT_SOURCE_DIR}/shader/toonf2.vert
 )
 
-ADD_LIBRARY(textfile
+ADD_LIBRARY(textfile)
+target_sources(textfile
+  PRIVATE
   ${TEXTFILE_SOURCES}
-
 )
+target_include_directories(textfile
+	PRIVATE
+	${CMAKE_CURRENT_BINARY_DIR}
+  include	
+	)
 
 ADD_LIBRARY(widget)
 target_sources(widget
@@ -63,6 +59,16 @@ target_sources(widget
   ${WIDGET_SOURCES}
   ${WIDGET_MOC_SOURCES}
   ${SHADER_SOURCES}
+)
+target_include_directories(widget
+	PRIVATE
+	${CMAKE_CURRENT_BINARY_DIR}
+  include	
+	)
+target_include_directories(widget SYSTEM
+  PUBLIC
+  ${Qt5Core_INCLUDE_DIRS}
+  ${Qt5Widgets_INCLUDE_DIRS}
 )
 TARGET_LINK_LIBRARIES(widget
   ${OpenCV_LIBS} 
@@ -80,6 +86,11 @@ target_sources(cvQTcameraGL
   ${MAIN_MOC_SOURCES}
   ${MAIN_SOURCES}
 )
+target_include_directories(cvQTcameraGL
+	PRIVATE
+	${CMAKE_CURRENT_BINARY_DIR}
+  include	
+	)
 TARGET_LINK_LIBRARIES(cvQTcameraGL
   widget
 )
